@@ -12,5 +12,3 @@
 %:
 	dh $@
 
-dh_override_auto_configure:
-	cmake .
