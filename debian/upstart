@@ -1,0 +1,21 @@
+# statsd-c - line-compatible statsd server in c
+#
+
+description	"statsd-c daemon"
+
+start on filesystem or runlevel [2345]
+stop on runlevel [!2345]
+
+respawn
+respawn limit 10 5
+umask 022
+
+pre-start script
+    test -x /var/lib/statsd-c || { mkdir -p /var/lib/statsd-c; chown statsd:statsd /var/lib/statsd-c }
+    mkdir -p -m0755 /var/run/statsd-c
+end script
+
+script
+	[ -e /etc/default/statsd-c ] && . /etc/default
+	exec /usr/sbin/statsd-c ${DAEMON_ARGS} -l /var/run/statsd-c -D
+end script
