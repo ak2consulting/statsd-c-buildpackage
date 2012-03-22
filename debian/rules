@@ -14,3 +14,6 @@ export DH_VERBOSE=1
 
 override_dh_auto_build:
 	cmake . && make
+
+override_dh_installinit:
+	dh_installinit --name="statsd"

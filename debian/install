@@ -1,2 +1,2 @@
-/usr/sbin/statsd-c
+/usr/sbin/statsd
 /usr/bin/statsd_client
