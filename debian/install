@@ -1,2 +1,3 @@
-/usr/sbin/statsd
-/usr/bin/statsd_client
+statsd usr/sbin
+statsd_client usr/bin
+debian/default etc/default/statsd
