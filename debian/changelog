@@ -1,0 +1,5 @@
+statsd-c (0.0+20120322-0~ppa1) unstable; urgency=low
+
+  * Initial release, built on 7843581879
+
+ -- OSOps Packaging Team <osops-packaging@lists.launchpad.net>  Thu, 22 Mar 2012 14:44:43 -0700

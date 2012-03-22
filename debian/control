@@ -1,0 +1,15 @@
+Source: statsd-c
+Section: network
+Priority: extra
+Maintainer: OSOps Packaging Team <osops-packaging@lists.launchpad.net>
+Build-Depends: debhelper (>= 8.0.0), cmake
+Standards-Version: 3.9.2
+Homepage: https://github.com/jbuchbinder/statsd-c
+Vcs-Git: git://github.org/osops/statsd-c-buildpackage
+Vcs-Browser: https://github.org/osops/statsd-c
+
+Package: statsd-c
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, cmake
+Description: a statsd-compatible server in C
+ A small, efficient, wire-compatible statsd compatible daemon

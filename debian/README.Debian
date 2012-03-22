@@ -1,0 +1,6 @@
+statsd-c for Debian
+-------------------
+
+This package has never been versioned upstream, so packages are versioned at 0.0+$(date +%Y%m%d)~<sha>
+
+ -- Ron Pedde <ron@pedde.com>  Thu, 22 Mar 2012 14:44:43 -0700
