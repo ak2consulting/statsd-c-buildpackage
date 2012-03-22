@@ -10,6 +10,6 @@ Vcs-Browser: https://github.org/osops/statsd-c
 
 Package: statsd-c
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, cmake
+Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: a statsd-compatible server in C
  A small, efficient, wire-compatible statsd compatible daemon
