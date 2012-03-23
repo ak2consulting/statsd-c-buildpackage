@@ -1,5 +1,5 @@
 Source: statsd-c
-Section: network
+Section: Network
 Priority: extra
 Maintainer: OSOps Packaging Team <osops-packaging@lists.launchpad.net>
 Build-Depends: debhelper (>= 8.0.0), cmake
