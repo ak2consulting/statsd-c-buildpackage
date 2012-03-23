@@ -12,7 +12,7 @@ case "$1" in
 	fi
 
 	if ! getent passwd statsd > /dev/null 2>&1; then
-	    adduser --system statsd --home /var/lib/statsd --ingroup statsd
+	    adduser --system statsd --home /var/lib/statsd --no-create-home --disabled-login --shell /bin/false --ingroup statsd
 	fi
     ;;
 
