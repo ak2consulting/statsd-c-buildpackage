@@ -11,11 +11,15 @@ respawn limit 10 5
 umask 022
 
 pre-start script
-    test -x /var/lib/statsd || { mkdir -p /var/lib/statsd; chown statsd:statsd /var/lib/statsd-c }
-    mkdir -p -m0755 /var/run/statsd
+    mkdir -p -m0770 /var/run/statsd
+    chown statsd:statsd /var/run/statsd
+
+    mkdir -p -m0770 /var/lib/statsd
+    chown statsd:statsd /var/lib/statsd
 end script
 
 script
+	DAEMON_ARGS
 	[ -e /etc/default/statsd ] && . /etc/default/statsd
-	exec /usr/sbin/statsd ${DAEMON_ARGS} -l /var/run/statsd-c -D
+	exec su -s /bin/sh -c "/usr/sbin/statsd ${DAEMON_ARGS} -l /var/run/statsd -D" statsd
 end script
