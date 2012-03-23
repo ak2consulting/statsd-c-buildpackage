@@ -18,7 +18,7 @@ override_dh_auto_build:
 override_dh_installinit:
 	if dpkg-vendor --derives-from ubuntu ; then \
 		for i in debian/*.upstart.in ; do \
-			MYPKG=$(basename $$i .upstart.in) ; \
+			MYPKG=`basename $$i .upstart.in` ; \
 			cp $$MYPKG.upstart.in $$MYPKG.upstart ; \
                 done ; \
         fi
