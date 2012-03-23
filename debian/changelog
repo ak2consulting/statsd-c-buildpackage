@@ -1,4 +1,4 @@
-statsd-c (0.0+20120322-0~ppa1) unstable; urgency=low
+statsd-c (0.0+20120322-1~ppa1) precise; urgency=low
 
   * Initial release, built on 7843581879
 
