@@ -99,7 +99,7 @@ void p_thread_flush(void *ptr);
 void p_thread_queue(void *ptr);
 
 void init_stats() {
-  char *startup_time = malloc(sizeof(char *));
+  char startup_time[12];
   sprintf(startup_time, "%ld", time(NULL));
 
   if (serialize_file && !clear_stats) {
@@ -113,8 +113,6 @@ void init_stats() {
   update_stat( "graphite", "last_flush", startup_time );
   update_stat( "messages", "last_msg_seen", startup_time );
   update_stat( "messages", "bad_lines_seen", "0" );
-
-  if (startup_time) free(startup_time);
 }
 
 void cleanup() {
@@ -613,7 +611,6 @@ void process_stats_packet(char buf_in[]) {
     if (token == NULL) { break; }
     if (i == 1) {
       syslog(LOG_DEBUG, "Found token '%s', key name\n", token);
-      key_name = malloc( strlen(token) + 1);
       key_name = strdup( token );
       sanitize_key(key_name);
       /* break; */
@@ -658,7 +655,6 @@ void process_stats_packet(char buf_in[]) {
             case 3:
               syslog(LOG_DEBUG, "case 3");
               if (subtoken == NULL) { break ; }
-              s_sample_rate = malloc(strlen(subtoken) + 1);
               s_sample_rate = strdup(subtoken);
               break;
           }
@@ -673,7 +669,7 @@ void process_stats_packet(char buf_in[]) {
       } else {
         /* Handle non-timer, as counter */
         if (s_sample_rate && *s_sample_rate == '@') {
-          sample_rate = strtod( (char *) *(s_sample_rate + 1), (char **) NULL );
+          sample_rate = strtod( (s_sample_rate + 1), (char **) NULL );
         }
         update_counter(key_name, value, sample_rate);
         syslog(LOG_DEBUG, "Found key name '%s'\n", key_name);
@@ -750,16 +746,17 @@ void p_thread_udp(void *ptr) {
       if (FD_ISSET(stats_udp_socket, &read_flags)) {
         FD_CLR(stats_udp_socket, &read_flags);
         memset(&buf_in, 0, sizeof(buf_in));
-        if (read(stats_udp_socket, buf_in, sizeof(buf_in)-1) <= 0) {
+        if (read(stats_udp_socket, buf_in, sizeof(buf_in)) <= 0) {
           close(stats_udp_socket);
           break;
         }
+        /* make sure that the buf_in is NULL terminated */
+        buf_in[BUFLEN - 1] = 0;
 
         syslog(LOG_DEBUG, "UDP: Received packet from %s:%d\nData: %s\n\n", 
             inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port), buf_in);
 
-        char *packet = malloc(sizeof(buf_in));
-        packet = strdup(buf_in);
+        char *packet = strdup(buf_in);
         syslog(LOG_DEBUG, "UDP: Storing packet in queue");
         queue_store( packet );
         syslog(LOG_DEBUG, "UDP: Stored packet in queue");
@@ -912,12 +909,12 @@ void p_thread_mgmt(void *ptr) {
                 STREAM_SEND_INT(i, s_timer->count)
                 if (s_timer->count > 0) {
                   double *j = NULL; bool first = 1;
-		  STREAM_SEND(i, " [")
+                  STREAM_SEND(i, " [")
                   while( (j=(double *)utarray_next(s_timer->values, j)) ) {
                     if (first == 1) { first = 0; STREAM_SEND(i, ",") }
                     STREAM_SEND_DOUBLE(i, *j)
                   }
-		  STREAM_SEND(i, "]")
+                  STREAM_SEND(i, "]")
                 }
                 STREAM_SEND(i, "\n")
               }
@@ -999,27 +996,26 @@ void p_thread_flush(void *ptr) {
       HASH_ITER(hh, counters, s_counter, tmp) {
         long double value = s_counter->value / flush_interval;
 #ifdef SEND_GRAPHITE
-        char *message = malloc(sizeof(char) * BUFLEN);
+        char message[BUFLEN];
         sprintf(message, "stats.%s %Lf %ld\nstats_counts_%s %Lf %ld\n", s_counter->key, value, ts, s_counter->key, s_counter->value, ts);
 #endif
         if (enable_gmetric) {
           {
             char *k = NULL;
             if (ganglia_metric_prefix != NULL) {
-              k = malloc(strlen(s_counter->key) + strlen(ganglia_metric_prefix));
+              k = malloc(strlen(s_counter->key) + strlen(ganglia_metric_prefix) + 1);
               sprintf(k, "%s%s", ganglia_metric_prefix, s_counter->key);
             } else {
-              k = malloc(strlen(s_counter->key));
               k = strdup(s_counter->key);
             }
             SEND_GMETRIC_DOUBLE(k, k, value, "count");
             if (k) free(k);
           }
           {
-            char *k = malloc(strlen(s_counter->key) + 13);
+            //char *k = malloc(strlen(s_counter->key) + 13);
             // sprintf(k, "%s", s_counter->key);
             SEND_GMETRIC_DOUBLE(s_counter->key, s_counter->key, s_counter->value, "count");
-            if (k) free(k);
+            //if (k) free(k);
           }
         }
 #ifdef SEND_GRAPHITE
@@ -1076,11 +1072,10 @@ void p_thread_flush(void *ptr) {
           double maxAtThreshold = max;
 
           if (s_timer->count > 1) {
-	    
-	    // Find the index of the 90th percentile threshold
+            // Find the index of the 90th percentile threshold
             int thresholdIndex = ( pctThreshold / 100.0 ) * s_timer->count;
             maxAtThreshold = * ( utarray_eltptr( s_timer->values, thresholdIndex - 1 ) );
-	    printf("Count = %d Thresh = %d, MaxThreshold = %f\n", s_timer->count, thresholdIndex, maxAtThreshold);
+            printf("Count = %d Thresh = %d, MaxThreshold = %f\n", s_timer->count, thresholdIndex, maxAtThreshold);
 
             double sum = 0;
             double *i = NULL; int count = 0;
@@ -1098,7 +1093,7 @@ void p_thread_flush(void *ptr) {
 
 
 #ifdef SEND_GRAPHITE
-          char *message = malloc(sizeof(char) * BUFLEN);
+          char message[BUFLEN];
           sprintf(message, "stats.timers.%s.mean %f %ld\n"
             "stats.timers.%s.upper %f %ld\n"
             "stats.timers.%s.upper_%d %f %ld\n"
@@ -1114,38 +1109,32 @@ void p_thread_flush(void *ptr) {
 
           if (enable_gmetric) {
             {
-	      
-	      // Mean value. Convert to seconds
-              char *k = malloc(strlen(s_timer->key) + 5);
+              // Mean value. Convert to seconds
+              char k[strlen(s_timer->key) + 6];
               sprintf(k, "%s_mean", s_timer->key);
               SEND_GMETRIC_DOUBLE(s_timer->key, k, mean/1000, "sec");
-              if (k) free(k);
             }
             {
-	      // Max value. Convert to seconds
-              char *k = malloc(strlen(s_timer->key) + 6);
+              // Max value. Convert to seconds
+              char k[strlen(s_timer->key) + 7];
               sprintf(k, "%s_upper", s_timer->key);
               SEND_GMETRIC_DOUBLE(s_timer->key, k, max/1000, "sec");
-              if (k) free(k);
             }
             {
-	      // Percentile value. Convert to seconds
-              char *k = malloc(strlen(s_timer->key) + 10);
+              // Percentile value. Convert to seconds
+              char k[strlen(s_timer->key) + 12];
               sprintf(k, "%s_%dth_pct", s_timer->key, pctThreshold);
               SEND_GMETRIC_DOUBLE(s_timer->key, k, maxAtThreshold/1000, "sec");
-              if (k) free(k);
             }
             {
-              char *k = malloc(strlen(s_timer->key) + 6);
+              char k[strlen(s_timer->key) + 7];
               sprintf(k, "%s_lower", s_timer->key);
               SEND_GMETRIC_DOUBLE(s_timer->key, k, min/1000, "sec");
-              if (k) free(k);
             }
             {
-              char *k = malloc(strlen(s_timer->key) + 6);
+              char k[strlen(s_timer->key) + 7];
               sprintf(k, "%s_count", s_timer->key);
-              SEND_GMETRIC_DOUBLE(s_timer->key, k, s_timer->count, "count");
-              if (k) free(k);
+              SEND_GMETRIC_INT(s_timer->key, k, s_timer->count, "count");
             }
           }
 #ifdef SEND_GRAPHITE
@@ -1169,7 +1158,7 @@ void p_thread_flush(void *ptr) {
       sprintf(message, "statsd.numStats %d %ld\n", numStats, ts);
 #endif
       if (enable_gmetric) {
-        SEND_GMETRIC_DOUBLE("statsd", "statsd_numstats_collected", numStats, "count");
+        SEND_GMETRIC_INT("statsd", "statsd_numstats_collected", numStats, "count");
       }
 #ifdef SEND_GRAPHITE
       if (statString) {
