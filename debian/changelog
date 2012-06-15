@@ -1,3 +1,10 @@
+statsd-c (0.0+20120615-1~ppa1) precise; urgency=low
+
+  * Refresh to 73204d869e
+  * add patches from github.com/rpedde/statsd-c for graphite support
+
+ -- OSOps Packaging Team <osops-packaging@lists.launchpad.net>  Fri, 15 Jun 2012 14:35:02 -0500
+
 statsd-c (0.0+20120322-1~ppa1) precise; urgency=low
 
   * Initial release, built on 7843581879

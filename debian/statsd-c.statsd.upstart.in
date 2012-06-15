@@ -19,7 +19,16 @@ pre-start script
 end script
 
 script
-	DAEMON_ARGS
-	[ -e /etc/default/statsd ] && . /etc/default/statsd
-	exec su -s /bin/sh -c "/usr/sbin/statsd ${DAEMON_ARGS} -l /var/run/statsd -D" statsd
+    DAEMON_ARGS=""
+    [ -e /etc/default/statsd ] && . /etc/default/statsd
+
+    if [ "${GANGLIA_HOST}" != "" ]; then
+        DAEMON_ARGS="${DAEMON_ARGS} -G ${GANGLIA_HOST}"
+    fi
+
+    if [ "${CARBON_HOST}" != "" ]; then
+        DAEMON_ARGS="${DAEMON_ARGS} -R ${CARBON_HOST}"
+    fi
+
+    exec su -s /bin/sh -c "/usr/sbin/statsd ${DAEMON_ARGS}" statsd
 end script
