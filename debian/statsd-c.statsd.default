@@ -19,10 +19,12 @@
 #    -c                clear stats on startup
 #
 
+# Hint: Don't daemonize.  Upstart will puke and make you reboot your box.  :/
+
 # Setting this will enable reporting to ganglia
 GANGLIA_HOST=""
 
 # Setting this will enable reporting to carbon/graphite
 CARBON_HOST=""
 
-DAEMON_ARGS="-D -l /var/lock/statsd -s /var/lib/statsd/state.json -F 60"
+DAEMON_ARGS="-s /var/lib/statsd/state.json -F 60"

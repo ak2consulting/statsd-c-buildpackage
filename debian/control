@@ -13,3 +13,9 @@ Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: a statsd-compatible server in C
  A small, efficient, wire-compatible statsd compatible daemon
+
+Package: statsd-client
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: a simple command-line tool to send statsd metrics
+ A simple command-line tools to send statsd metrics

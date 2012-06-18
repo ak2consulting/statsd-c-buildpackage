@@ -17,7 +17,7 @@ DESC=statsd             # Introduce a short description here
 NAME=statsd             # Introduce the short server's name here
 DAEMON=/usr/sbin/statsd # Introduce the server's location here
 DAEMON_ARGS=""             # Arguments to run the daemon with
-PIDFILE=/var/run/$NAME.pid
+PIDFILE=/var/run/statsd/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 GANGLIA_HOST=""
 CARBON_HOST=""
@@ -67,7 +67,7 @@ do_start()
         start-stop-daemon --start --quiet --pidfile $PIDFILE --exec $DAEMON --test > /dev/null \
                 || return 1
         start-stop-daemon --user ${NAME} --start --quiet --pidfile $PIDFILE --exec $DAEMON -- \
-                $DAEMON_ARGS ${EXTRA_OPTS} \
+                -l /var/run/statsd/statsd.pid $DAEMON_ARGS ${EXTRA_OPTS} \
                 || return 2
 }
 

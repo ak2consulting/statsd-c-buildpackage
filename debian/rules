@@ -20,7 +20,7 @@ override_dh_installinit:
 		for i in debian/*.upstart.in ; do \
 			MYPKG=`basename $$i .upstart.in` ; \
 			cp debian/$$MYPKG.upstart.in debian/$$MYPKG.upstart ; \
-                done ; \
-        fi
+		done ; \
+	fi
 
 	dh_installinit --name="statsd"
